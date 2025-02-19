@@ -1,12 +1,13 @@
-// src/components/CargaExcel.jsx
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { guardarEnFirebase } from '../services/FirebaseService';
-import { Link } from 'react-router-dom';
-import Swal from 'sweetalert2';  // Importa SweetAlert2
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { FaArrowLeft } from 'react-icons/fa';  // Icono para el botón de volver
 
 const CargaExcel = () => {
   const [productos, setProductos] = useState([]);
+  const navigate = useNavigate(); // Hook para redireccionar
 
   // Función para procesar el archivo Excel
   const procesarArchivo = (e) => {
@@ -32,7 +33,7 @@ const CargaExcel = () => {
       localStorage.setItem('productos', JSON.stringify(productosProcesados));
       guardarEnFirebase(productosProcesados);
 
-      // SweetAlert2 en lugar de alert()
+      // Notificación con SweetAlert2
       Swal.fire({
         icon: 'success',
         title: '¡Carga exitosa!',
@@ -45,10 +46,20 @@ const CargaExcel = () => {
   };
 
   return (
-    <div className="card p-4 mt-4">
-      <h3>Carga de Productos desde Excel</h3>
-      <input type="file" className="form-control mt-3" onChange={procesarArchivo} />
-      <Link to="/Dashboard" className="btn btn-primary mt-3">Volver al Dashboard</Link>
+    <div className="container d-flex flex-column align-items-center justify-content-center vh-100">
+      <div className="card p-4 shadow" style={{ maxWidth: '500px', width: '100%' }}>
+        {/* Botón para volver */}
+        <button 
+          className="btn btn-outline-secondary d-flex align-items-center mb-3"
+          onClick={() => navigate('/dashboard')}
+        >
+          <FaArrowLeft className="me-2" /> Volver al Dashboard
+        </button>
+
+        {/* Formulario de carga */}
+        <h4 className="text-center mb-3">Carga de Productos desde Excel</h4>
+        <input type="file" className="form-control mb-3" onChange={procesarArchivo} />
+      </div>
     </div>
   );
 };

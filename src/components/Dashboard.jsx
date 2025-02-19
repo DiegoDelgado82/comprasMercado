@@ -1,39 +1,48 @@
-// src/components/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { auth } from '../firebase';
-import { Link } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import CargaExcel from './CargaExcel';
+import Busqueda from './Busqueda';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [activeComponent, setActiveComponent] = useState(null);
 
   useEffect(() => {
-    // Obtener el usuario autenticado de Firebase
-    const currentUser = auth.currentUser;
-    setUser(currentUser);
+    setUser(auth.currentUser);
   }, []);
 
   if (!user) {
-    return (
-      <div className="text-center mt-5">
-        <div className="spinner-border" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </div>
-      </div>
-    );
+    return <div className="text-center mt-5">Cargando...</div>;
   }
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Bienvenido, {user.email || 'Usuario'}</h2>
-      
+    <div className="container-fluid d-flex flex-column min-vh-100 justify-content-start align-items-center mt-2">
+      {/* Si hay un componente activo, solo lo mostramos sin el Dashboard */}
+      {activeComponent === 'carga' && <CargaExcel onVolver={() => setActiveComponent(null)} />}
+      {activeComponent === 'busqueda' && <Busqueda onVolver={() => setActiveComponent(null)} />}
 
-      <div className="d-grid gap-3">
-        <Link to="/carga-precios" className="btn btn-primary btn-lg">Cargar Archivo de Precios</Link>
-        <Link to="/busqueda-costos" className="btn btn-success btn-lg">Búsqueda de Costos</Link>
-        <Link to="/gestionar-pedidos" className="btn btn-warning btn-lg">Gestionar Pedidos</Link>
-        <Link to="/historico-precios" className="btn btn-info btn-lg text-white">Histórico de Precios</Link>
-      </div>
+      {/* Si NO hay un componente activo, mostramos el Dashboard */}
+      {!activeComponent && (
+        <>
+          {/* Header con Logo */}
+          <div className="text-center mb-3">
+            <img src="/elmercadologo.png" alt="Logo" className="img-fluid" style={{ maxHeight: '80px' }} />
+          </div>
+
+          {/* Información del Usuario */}
+          <div className="card p-3 mb-3 text-center w-100">
+            <h4>Bienvenido, {user.email || 'Usuario'}</h4>
+          </div>
+
+          {/* Botones de Navegación */}
+          <div className="d-grid gap-3 w-100">
+            <button className="btn btn-primary" onClick={() => setActiveComponent('carga')}>📂 Cargar Archivo de Precios</button>
+            <button className="btn btn-success" onClick={() => setActiveComponent('busqueda')}>🔍 Búsqueda de Costos</button>
+            <button className="btn btn-warning">📋 Gestionar Pedidos (Próximamente)</button>
+            <button className="btn btn-secondary">📊 Histórico de Precios (Próximamente)</button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

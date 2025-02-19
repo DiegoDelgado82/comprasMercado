@@ -1,63 +1,76 @@
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase'; // Asegúrate de que la ruta de tu archivo firebase.js sea correcta
-import { useNavigate } from 'react-router-dom'; // Si usas React Router para redirigir después del login
+import { auth } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Si quieres redirigir al usuario después de iniciar sesión
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Resetea el error antes de intentar el login
+    setError('');
     try {
-      // Intentamos iniciar sesión con Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log('Usuario autenticado:', userCredential.user);
-      
-      // Si la autenticación es exitosa, redirige al usuario al dashboard o a la página principal
-      navigate('/dashboard'); // Aquí puedes cambiar la ruta de destino según tu app
-
+      navigate('/dashboard');
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
-      setError(err.message); // Muestra el error al usuario
+      setError('Correo o contraseña incorrectos.');
     }
   };
 
   return (
-    <div className="login-container">
-      <h2>Iniciar sesión</h2>
-      <form onSubmit={handleLogin} className="login-form">
-        <div className="input-group">
-          <label htmlFor="email">Correo Electrónico</label>
-          <input 
-            type="email" 
-            id="email" 
-            placeholder="Introduce tu correo" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            required
-          />
-        </div>
-        
-        <div className="input-group">
-          <label htmlFor="password">Contraseña</label>
-          <input 
-            type="password" 
-            id="password" 
-            placeholder="Introduce tu contraseña" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            required
+    <div className="container d-flex justify-content-center align-items-center vh-100">
+      <div className="card p-5 shadow" style={{ maxWidth: '400px', width: '100%' }}>
+        {/* Logo */}
+        <div className="text-center mb-3">
+          <img 
+            src="/elmercadologo.png"
+            alt="Logo"
+            className="img-fluid"
+            style={{ maxHeight: '90px' }} 
           />
         </div>
 
-        <button type="submit" className="login-btn">Iniciar sesión</button>
+        {/* Formulario de Login */}
+        <h4 className="text-center mb-3">Iniciar sesión</h4>
+        <form onSubmit={handleLogin}>
+          <div className="mb-2">
+            <label htmlFor="email" className="form-label">Email</label>
+            <input
+              type="email"
+              id="email"
+              className="form-control"
+              placeholder="Introduce tu correo"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        {error && <p className="error-message">{error}</p>} {/* Muestra el error si existe */}
-      </form>
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              className="form-control"
+              placeholder="Introduce tu contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Botón de Iniciar Sesión */}
+          <button type="submit" className="btn btn-primary w-100">Ingresar</button>
+
+          {/* Mensaje de error */}
+          {error && <p className="text-danger text-center mt-2">{error}</p>}
+        </form>
+      </div>
     </div>
   );
 };
