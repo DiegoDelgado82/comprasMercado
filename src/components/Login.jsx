@@ -23,8 +23,8 @@ const Login = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
-      <div className="card p-5 shadow" style={{ maxWidth: '400px', width: '100%' }}>
+    <div className="d-flex vh-100 justify-content-center align-items-center bg-light">
+     <div className="card shadow p-4" style={{ width: "350px" }}>
         {/* Logo */}
         <div className="text-center mb-3">
           <img 

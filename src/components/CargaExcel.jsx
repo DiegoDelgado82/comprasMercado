@@ -37,7 +37,7 @@ const CargaExcel = () => {
       Swal.fire({
         icon: 'success',
         title: '¡Carga exitosa!',
-        text: 'Los datos se cargaron correctamente.',
+        text: 'Los datos se cargaron correctamente. En unos minutos estarán los datos disponibles',
         confirmButtonText: 'Aceptar',
       });
     };

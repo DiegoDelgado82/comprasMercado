@@ -13,7 +13,6 @@ const Busqueda = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Solo cargar productos de Firestore si no están en localStorage
     const productosGuardados = localStorage.getItem('productos');
     if (!productosGuardados) {
       fetchProductosFromFirestore();
@@ -37,7 +36,7 @@ const Busqueda = () => {
           productosData.push({ ...doc.data(), id: doc.id });
         });
         localStorage.setItem('productos', JSON.stringify(productosData));
-        setProductos(productosData); // Guardar productos solo si no estaban en localStorage
+        setProductos(productosData);
       }
     } catch (error) {
       console.error('Error al obtener productos:', error);
@@ -52,7 +51,7 @@ const Busqueda = () => {
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
-      setProductos([]); // Limpiar productos si no hay búsqueda
+      setProductos([]);
     } else {
       const productosGuardados = JSON.parse(localStorage.getItem('productos')) || [];
       const resultados = productosGuardados.filter((producto) =>
@@ -62,7 +61,6 @@ const Busqueda = () => {
     }
   }, [searchTerm]);
 
-  // Ordenar proveedores por costo
   const obtenerPreciosOrdenados = (producto) => {
     const proveedores = [
       { nombre: 'NIC', costo: producto.NIC },
@@ -74,11 +72,43 @@ const Busqueda = () => {
       { nombre: 'SCHAVONI', costo: producto.SCHAVONI },
     ];
 
-    const preciosOrdenados = proveedores
-      .filter((prov) => prov.costo)
-      .sort((a, b) => a.costo - b.costo);
+    return proveedores.filter((prov) => prov.costo).sort((a, b) => a.costo - b.costo);
+  };
 
-    return preciosOrdenados;
+  const handleNegociar = (producto) => {
+    Swal.fire({
+      title: 'Negociación de Precio',
+      html: `
+        <select id="proveedor" class="swal2-input">
+          <option value="AMAYA">AMAYA</option>
+          <option value="BORREGUITO">BORREGUITO</option>
+          <option value="JALIL">JALIL</option>
+          <option value="LOS GRINGOS">LOS GRINGOS</option>
+          <option value="PARIS">PARIS</option>
+          <option value="SCHAVONI">SCHAVONI</option>
+        </select>
+        <input type="number" id="costo" class="swal2-input" placeholder="Costo Negociado">
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      preConfirm: () => {
+        const proveedor = document.getElementById('proveedor').value;
+        const costo = document.getElementById('costo').value;
+        if (!costo) {
+          Swal.showValidationMessage('Debe ingresar un costo');
+        }
+        return { proveedor, costo };
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        let negociaciones = JSON.parse(localStorage.getItem('negociaciones')) || {};
+        if (!negociaciones[producto.EAN]) {
+          negociaciones[producto.EAN] = [];
+        }
+        negociaciones[producto.EAN].push({ proveedor: result.value.proveedor, costo: result.value.costo });
+        localStorage.setItem('negociaciones', JSON.stringify(negociaciones));
+      }
+    });
   };
 
   return (
@@ -98,15 +128,12 @@ const Busqueda = () => {
           <h3 className="text-center">Resultados</h3>
           {productos.map((producto) => {
             const preciosOrdenados = obtenerPreciosOrdenados(producto);
-            const mejorProveedor = preciosOrdenados[0];
-
             return (
               <div key={producto.id} className="card mb-4 shadow-sm">
                 <div className="card-body">
                   <h5 className="card-title">EAN: {producto.EAN}</h5>
-                  <h6 className="card-subtitle mb-2 text-muted">
-                    Descripción: {producto.Descripción}
-                  </h6>
+                  <h6 className="card-subtitle mb-2 text-muted">Descripción: {producto.Descripción}</h6>
+                  <h6 className="card-subtitle mb-2 text-muted"><b>PVP: ${producto.PRECIO}</b></h6>
                   <table className="table table-striped table-bordered">
                     <thead className="thead-dark">
                       <tr>
@@ -115,25 +142,20 @@ const Busqueda = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {preciosOrdenados.map((prov, index) => {
-                        const isBestPrice = prov === mejorProveedor;
-                        return (
-                          <tr
-                            key={index}
-                            style={{
-                              backgroundColor: isBestPrice ? '#e0f7fa' : 'white',
-                              fontWeight: isBestPrice ? 'bold' : 'normal',
-                            }}
-                          >
-                            <td>
-                              {prov.nombre} {isBestPrice && <FaStar className="text-warning ms-2" />}
-                            </td>
-                            <td>{Math.round(prov.costo)}</td>
-                          </tr>
-                        );
-                      })}
+                      {preciosOrdenados.map((prov, index) => (
+                        <tr key={index}>
+                          <td>{prov.nombre}</td>
+                          <td>{Math.round(prov.costo)}</td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
+                  <button
+                    className="btn btn-warning mt-2"
+                    onClick={() => handleNegociar(producto)}
+                  >
+                    Para Negociar
+                  </button>
                 </div>
               </div>
             );
