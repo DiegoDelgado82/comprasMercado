@@ -3,7 +3,7 @@ import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Swal from 'sweetalert2';
-import { FaArrowLeft, FaStar } from 'react-icons/fa';
+import { FaArrowLeft} from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const Busqueda = () => {
