@@ -3,7 +3,7 @@ import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Swal from 'sweetalert2';
-import { FaArrowLeft} from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const Busqueda = () => {
@@ -14,7 +14,9 @@ const Busqueda = () => {
 
   useEffect(() => {
     const productosGuardados = localStorage.getItem('productos');
-    if (!productosGuardados) {
+    if (productosGuardados) {
+      setProductos(JSON.parse(productosGuardados));
+    } else {
       fetchProductosFromFirestore();
     }
   }, []);
@@ -31,10 +33,10 @@ const Busqueda = () => {
           confirmButtonText: 'Aceptar',
         });
       } else {
-        const productosData = [];
-        querySnapshot.forEach((doc) => {
-          productosData.push({ ...doc.data(), id: doc.id });
-        });
+        const productosData = querySnapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
         localStorage.setItem('productos', JSON.stringify(productosData));
         setProductos(productosData);
       }
@@ -45,8 +47,7 @@ const Busqueda = () => {
   };
 
   const handleSearchChange = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
+    setSearchTerm(e.target.value.toLowerCase());
   };
 
   useEffect(() => {
@@ -93,23 +94,41 @@ const Busqueda = () => {
       confirmButtonText: 'Guardar',
       preConfirm: () => {
         const proveedor = document.getElementById('proveedor').value;
-        const costo = document.getElementById('costo').value;
-        if (!costo) {
-          Swal.showValidationMessage('Debe ingresar un costo');
+        const costo = document.getElementById('costo').value.trim();
+        
+        if (!costo || isNaN(costo) || parseFloat(costo) <= 0) {
+          Swal.showValidationMessage('Debe ingresar un costo válido');
+          return false;
         }
-        return { proveedor, costo };
+        
+        return { proveedor, costo: parseFloat(costo) };
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        let negociaciones = JSON.parse(localStorage.getItem('negociaciones')) || {};
-        if (!negociaciones[producto.EAN]) {
-          negociaciones[producto.EAN] = [];
+        // ✅ Aseguramos que negociaciones sea siempre un array
+        let negociaciones = JSON.parse(localStorage.getItem('negociaciones')) || [];
+  
+        // Si negociaciones no es un array, lo convertimos en uno
+        if (!Array.isArray(negociaciones)) {
+          negociaciones = [];
         }
-        negociaciones[producto.EAN].push({ proveedor: result.value.proveedor, costo: result.value.costo });
+  
+        // Agregar nueva negociación con el formato correcto
+        negociaciones.push({
+          EAN: producto.EAN,
+          Descripción: producto.Descripción,
+          Costo: result.value.costo.toFixed(2),
+          Proveedor: result.value.proveedor
+        });
+  
+        // Guardar en localStorage
         localStorage.setItem('negociaciones', JSON.stringify(negociaciones));
+  
+        Swal.fire('Guardado', 'Negociación agregada correctamente', 'success');
       }
     });
   };
+  
 
   return (
     <div className="container-fluid mt-4">
@@ -145,7 +164,7 @@ const Busqueda = () => {
                       {preciosOrdenados.map((prov, index) => (
                         <tr key={index}>
                           <td>{prov.nombre}</td>
-                          <td>{Math.round(prov.costo)}</td>
+                          <td>${prov.costo.toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>

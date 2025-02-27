@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth } from '../firebase';
 import CargaExcel from './CargaExcel';
 import Busqueda from './Busqueda';
+import Lista from './ListaNegociaciones'
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -20,6 +21,7 @@ const Dashboard = () => {
       {/* Si hay un componente activo, solo lo mostramos sin el Dashboard */}
       {activeComponent === 'carga' && <CargaExcel onVolver={() => setActiveComponent(null)} />}
       {activeComponent === 'busqueda' && <Busqueda onVolver={() => setActiveComponent(null)} />}
+      {activeComponent === 'lista' && <Lista onVolver={() => setActiveComponent(null)} />}
 
       {/* Si NO hay un componente activo, mostramos el Dashboard */}
       {!activeComponent && (
@@ -38,7 +40,8 @@ const Dashboard = () => {
           <div className="d-grid gap-3 w-100">
             <button className="btn btn-primary" onClick={() => setActiveComponent('carga')}>📂 Cargar Archivo de Precios</button>
             <button className="btn btn-success" onClick={() => setActiveComponent('busqueda')}>🔍 Búsqueda de Costos</button>
-            <button className="btn btn-warning">📋 Gestionar Pedidos (Próximamente)</button>
+            <button className="btn btn-warning" onClick={() => setActiveComponent('lista')}>🔍 Lista de Negociaciones</button>
+          
             <button className="btn btn-secondary">📊 Histórico de Precios (Próximamente)</button>
           </div>
         </>
