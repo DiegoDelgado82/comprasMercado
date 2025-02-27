@@ -51,9 +51,9 @@ const CargaExcel = () => {
         {/* Botón para volver */}
         <button 
           className="btn btn-outline-secondary d-flex align-items-center mb-3"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/')}
         >
-          <FaArrowLeft className="me-2" /> Volver al Dashboard
+          <FaArrowLeft className="me-2" /> Volver al Loguin
         </button>
 
         {/* Formulario de carga */}

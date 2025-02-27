@@ -4,6 +4,7 @@ import CargaExcel from './CargaExcel';
 import Busqueda from './Busqueda';
 import Lista from './ListaNegociaciones'
 
+
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [activeComponent, setActiveComponent] = useState(null);
